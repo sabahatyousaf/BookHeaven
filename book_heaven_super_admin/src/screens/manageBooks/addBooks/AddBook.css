@@ -1,0 +1,114 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+
+:root {
+  --font-family: "Roboto", sans-serif;
+  --primary: #7d64c3;
+  --primary-light: #a691e3;
+  --success: #35f338;
+  --error: #f00221;
+  --white: #ffffff;
+  --dark: #333333;
+  --gray: #dde0e5;
+  --light-gray: #f7f7f7;
+  --transition-speed: 0.3s;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  text-decoration: none;
+  list-style: none;
+}
+
+/* ------------------------------ ADD BOOK CSS --------------------------------------- */
+/* ----------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------- */
+
+#upload-book {
+  background: var(--white);
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin: 20px 20px;
+}
+
+#upload-book .img-container {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid var(--primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.3s ease-in-out;
+}
+
+#upload-book .img-container:hover {
+  transform: scale(1.05);
+}
+
+#upload-book .image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#upload-book .title {
+  color: var(--primary);
+  font-family: var(--font-family);
+}
+
+#upload-book input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--gray);
+  border-radius: 6px;
+  font-size: 16px;
+  transition: all 0.3s ease-in-out;
+}
+
+#upload-book input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 8px rgba(125, 100, 195, 0.3);
+}
+
+#upload-book .file-upload-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  border: 2px dashed var(--primary-light);
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary-light);
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  width: 100%;
+  max-width: 300px;
+  margin: auto;
+}
+
+#upload-book .file-upload-container:hover {
+  background: rgba(35, 73, 204, 0.1);
+  border-color: var(--primary);
+}
+
+#upload-book .file-label {
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+  transition: color 0.3s ease-in-out;
+}
+
+#upload-book .file-upload-container:hover .file-label {
+  color: var(--error);
+}

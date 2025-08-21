@@ -1,0 +1,134 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+
+:root {
+  --font-family: "Roboto", serif;
+  --primary: #7d64c3;
+  --primary-light: #a691e3;
+  --success: #35f338;
+  --error: #f00221;
+  --white: #ffffff;
+  --dark: #333333;
+  --gray: #dde0e5;
+  --light-gray: #f7f7f7;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  text-decoration: none;
+  list-style: none;
+}
+
+/* ------------------------------ STOCK SCREEN CSS ----------------------------------- */
+/* ----------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------- */
+
+#stock .stocks-container {
+  padding: 20px;
+  background: var(--white);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#stock .stocks-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 20px;
+  margin-left: 14px;
+}
+
+#stock .table-responsive {
+  overflow-x: auto;
+}
+
+#stock .custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--white);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#stock .custom-table thead {
+  background: var(--primary);
+  color: var(--white);
+}
+
+#stock .custom-table th,
+#stock .custom-table td {
+  padding: 12px 15px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+#stock .custom-table tbody tr {
+  transition: background 0.3s ease-in-out, transform 0.2s ease;
+}
+
+#stock .custom-table tbody tr:hover {
+  background: var(--gray);
+  transform: scale(1.02);
+  cursor: pointer;
+}
+
+#stock .stock-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#stock .stock-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+#stock .stock-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#stock .action-button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+#stock .action-button.increase-stock {
+  background-color: var(--success);
+  color: var(--white);
+}
+
+#stock .action-button.decrease-stock {
+  background-color: var(--error);
+  color: var(--white);
+}
+
+#stock .action-button i {
+  margin-right: 3px;
+}
+
+#stock .no-books-found {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #d32f2f;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 20px;
+  background-color: #ffebee;
+  border-radius: 8px;
+  margin-top: 20px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}

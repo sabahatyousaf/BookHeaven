@@ -1,0 +1,150 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+
+:root {
+  --font-family: "Roboto", serif;
+  --primary: #7D64C3;
+  --success: #35f338;
+  --error: #f00221;
+  --white: #ffffff;
+  --dark: #000000;
+  --gray: #dde0e5;
+  --card-radius: 10px;
+  --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  text-decoration: none;
+  list-style: none;
+}
+
+/* ---------------------------------- CARD CSS --------------------------------------- */
+/* ----------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------- */
+
+#card .card-container {
+  cursor: pointer;
+}
+
+#card .custom-card {
+  width: 100%;
+  max-width: 300px;
+  height: 40vh;
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  color: var(--white);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(
+    45deg,
+    rgba(255, 105, 180, 0.7),
+    rgba(123, 31, 162, 0.7)
+  );
+  padding: 5px;
+  animation: fadeInUp 0.5s ease-in-out;
+  transform: scale(0.95);
+}
+
+#card .custom-card:hover {
+  transform: scale(1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+#card .card-header {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: 10px;
+  background: none;
+  width: 200px;
+}
+
+#card .card-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--white);
+  margin-top: 5px;
+}
+
+#card .card-icon {
+  font-size: 24px;
+  color: var(--white);
+  animation: pulse 2s infinite ease-in-out;
+}
+
+#card .card-stats {
+  font-size: 1rem;
+}
+
+#card .stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+#card .stat-label {
+  font-weight: 600;
+  color: var(--white);
+}
+
+#card .stat-number {
+  font-weight: bold;
+  font-size: 1rem;
+  color: var(--white);
+  transition: color 0.3s ease;
+  margin-left: 30px;
+}
+
+#card .stat-item:hover .stat-number {
+  color: var(--primary);
+}
+
+#card .card-container:nth-child(2) .custom-card {
+  background: linear-gradient(
+    45deg,
+    rgba(76, 175, 80, 0.7),
+    rgba(25, 118, 210, 0.7)
+  );
+}
+
+#card .card-container:nth-child(3) .custom-card {
+  background: linear-gradient(
+    45deg,
+    rgba(255, 193, 7, 0.7),
+    rgba(244, 67, 54, 0.7)
+  );
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

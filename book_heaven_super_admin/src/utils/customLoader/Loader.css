@@ -1,0 +1,41 @@
+:root {
+  --font-family: "Roboto", serif;
+  --primary: #7d64c3;
+  --primary-light: #a691e3;
+  --success: #35f338;
+  --error: #f00221;
+  --white: #ffffff;
+  --dark: #333333;
+  --gray: #dde0e5;
+  --light-gray: #f7f7f7;
+}
+
+/* ------------------------------ LOADER CSS ----------------------------------------- */
+/* ----------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------- */
+
+#loader .custom-loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#loader .custom-loader {
+  border: 2px solid var(--success);
+  border-left-color: var(--primary);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

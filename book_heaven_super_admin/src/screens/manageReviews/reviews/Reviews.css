@@ -1,0 +1,142 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+
+:root {
+  --font-family: "Roboto", serif;
+  --primary: #7d64c3;
+  --primary-light: #a691e3;
+  --success: #35f338;
+  --error: #f00221;
+  --white: #ffffff;
+  --dark: #333333;
+  --gray: #dde0e5;
+  --light-gray: #f7f7f7;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  text-decoration: none;
+  list-style: none;
+}
+
+/* ------------------------------ REVIEW SCREEN CSS ---------------------------------- */
+/* ----------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------- */
+
+#review .reviews-container {
+  padding: 20px;
+  background: var(--white);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#review .reviews-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 20px;
+  margin-left: 14px;
+}
+
+#review .user-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#review .user-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin-left: 5px;
+}
+
+#review .table-responsive {
+  overflow-x: auto;
+}
+
+#review .custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--white);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#review .custom-table thead {
+  background: var(--primary);
+  color: var(--white);
+}
+
+#review .custom-table th,
+#review .custom-table td {
+  padding: 12px 15px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+#review .custom-table tbody tr {
+  transition: background 0.3s ease-in-out, transform 0.2s ease;
+}
+
+#review .custom-table tbody tr:hover {
+  background: var(--gray);
+  transform: scale(1.02);
+  cursor: pointer;
+}
+
+#review .review-comment {
+  max-width: 300px;
+  word-wrap: break-word;
+}
+
+#review .review-rating {
+  text-align: center;
+}
+
+#review .review-user {
+  text-align: center;
+}
+
+#review .action-button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+#review .action-button.view-detail {
+  background-color: var(--primary);
+  color: var(--white);
+}
+
+#review .action-button.delete-review {
+  background-color: var(--error);
+  color: var(--white);
+}
+
+#review .action-button i {
+  margin-right: 3px;
+}
+
+#review .no-reviews-found {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #d32f2f;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 20px;
+  background-color: #ffebee;
+  border-radius: 8px;
+  margin-top: 20px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
