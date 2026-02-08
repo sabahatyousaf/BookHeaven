@@ -180,6 +180,16 @@ const Profile = () => {
             />
           </View>
 
+           <View style={styles.orderContainer}>
+            <ProfileScreenCard
+              title="My Library"
+              iconName="book"
+              iconColor={theme.colors.primary}
+              rightIcon="chevron-forward"
+              onPressFunction={() => navigation.navigate('My_Library')}
+            />
+          </View>
+
           <View style={styles.customerCareContainer}>
             <ProfileScreenCard
               title="Customer Care"

@@ -36,6 +36,20 @@ const orderSchema = new mongoose.Schema(
       default: "ORDER_RECEIVED",
     },
 
+    statusHistory: [
+      {
+        status: String,
+        changedAt: {
+          type: Date,
+          default: Date.now,
+        },
+        changedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+      },
+    ],
+
     payment: {
       type: String,
       enum: ["PENDING", "PAID", "UNPAID"],

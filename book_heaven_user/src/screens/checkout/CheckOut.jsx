@@ -94,6 +94,7 @@ const CheckOut = () => {
         shippingFee: shippingFee.toString(),
         totalAmount: totalAmount,
         paymentMethod: selectedMethod,
+        
       };
 
       // Dispatch the order

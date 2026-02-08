@@ -59,7 +59,7 @@ const userSchema = new mongoose.Schema(
           type: Number,
           required: true
         },
-    
+
         unitPrice: {  // This will store the book's original price
           type: Number,
           required: true
@@ -96,8 +96,17 @@ const userSchema = new mongoose.Schema(
         // Status of the order (enum: PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED, default: PENDING)
         status: {
           type: String,
-          enum: ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"],
-          default: "PENDING",
+          enum: [
+            "ORDER_RECEIVED", // Order placed but payment not confirmed yet
+            "PAYMENT_CONFIRMED", // Payment successfully processed
+            "PREPARING", // Barista is making the drinks
+            "READY_FOR_PICKUP", // Order is ready at counter
+            "PICKED_UP", // Customer has received order
+            "COMPLETED", // Order fulfilled (for records)
+            "CANCELLED", // Order cancelled before preparation
+            "REFUNDED", // Order cancelled and refunded
+          ],
+          default: "ORDER_RECEIVED",
         },
         // Timestamp of when the order was placed (default: current time)
         placedAt: {

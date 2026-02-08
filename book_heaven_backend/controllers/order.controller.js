@@ -24,10 +24,10 @@ exports.placeOrder = async (req, res) => {
       });
     }
 
-    // Validate calculate subtotal
     let calculatedSubtotal = 0;
+
     for (const item of items) {
-      const book = await Book.findById(item.bookId); // Changed Product -> Book, productId -> bookId
+      const book = await Book.findById(item.bookId);
       if (!book) {
         return res.status(404).json({
           success: false,
@@ -48,7 +48,6 @@ exports.placeOrder = async (req, res) => {
       });
     }
 
-    // Create the order with initial statuses
     const order = new Order({
       userId,
       items,
@@ -62,15 +61,13 @@ exports.placeOrder = async (req, res) => {
         {
           status: "ORDER_RECEIVED",
           changedAt: new Date(),
-          changedBy: "system",
+          changedBy: userId, // ✅ FIX HERE
         },
       ],
     });
 
-    // Save the order
     const savedOrder = await order.save();
 
-    // Update the user's orders array
     await User.findByIdAndUpdate(
       userId,
       {
@@ -99,6 +96,7 @@ exports.placeOrder = async (req, res) => {
     });
   }
 };
+
 
 // Get all orders
 exports.getAllOrders = async (req, res) => {
@@ -222,11 +220,10 @@ exports.cancelOrder = async (req, res) => {
 // Update the status of an order (only for SuperAdmin)
 exports.updateOrderStatus = async (req, res) => {
   try {
-    // Only SUPERADMIN can update order status
     if (req.user.role !== "SUPERADMIN") {
       return res.status(403).json({
         success: false,
-        message: "Unauthorized - Only SUPERADMIN can update order status",
+        message: "Only SUPERADMIN can update order status",
       });
     }
 
@@ -240,75 +237,64 @@ exports.updateOrderStatus = async (req, res) => {
       });
     }
 
-    // Valid statuses for coffee shop
-    const validStatuses = [
-      "ORDER_RECEIVED",
-      "PAYMENT_CONFIRMED",
-      "PREPARING",
-      "READY_FOR_PICKUP",
-      "PICKED_UP",
-      "COMPLETED",
-      "CANCELLED",
-      "REFUNDED",
-    ];
-
-    if (!validStatuses.includes(status)) {
+    // 🚫 Payment must be PAID before confirmation
+    if (status === "PAYMENT_CONFIRMED" && order.payment !== "PAID") {
       return res.status(400).json({
         success: false,
-        message: "Invalid status",
+        message: "Payment must be PAID before confirming order",
       });
     }
 
-    // Status transition validation
-    const currentStatus = order.status;
-
-    // Cannot revert from finalized states
-    if (["COMPLETED", "CANCELLED", "REFUNDED"].includes(currentStatus)) {
-      return res.status(400).json({
-        success: false,
-        message: `Cannot modify order from ${currentStatus} state`,
-      });
+    // ✅ Initialize history if missing
+    if (!Array.isArray(order.statusHistory)) {
+      order.statusHistory = [];
     }
 
-    // Valid status transitions
-    if (status === "READY_FOR_PICKUP" && currentStatus !== "PREPARING") {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Order must be in PREPARING status before marking as READY_FOR_PICKUP",
-      });
-    }
-
-    if (status === "PICKED_UP" && currentStatus !== "READY_FOR_PICKUP") {
-      return res.status(400).json({
-        success: false,
-        message: "Order must be READY_FOR_PICKUP before marking as PICKED_UP",
-      });
-    }
-
-    if (status === "COMPLETED" && currentStatus !== "PICKED_UP") {
-      return res.status(400).json({
-        success: false,
-        message: "Order must be PICKED_UP before marking as COMPLETED",
-      });
-    }
-
-    // Update order status and history
+    // Update order status
     order.status = status;
-    order.statusHistory = order.statusHistory || [];
     order.statusHistory.push({
       status,
-      changedAt: new Date(),
       changedBy: req.user._id,
     });
 
     await order.save();
 
-    // Update user's order reference
-    await User.updateOne(
-      { "orders.orderId": order._id },
-      { $set: { "orders.$.status": status } }
-    );
+    // 📚 ADD BOOKS TO USER LIBRARY
+    if (status === "PAYMENT_CONFIRMED") {
+      const user = await User.findById(order.userId);
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      const existingBookIds = user.library.map((b) =>
+        b.bookId.toString()
+      );
+
+      const booksToAdd = [];
+
+      for (const item of order.items) {
+        if (existingBookIds.includes(item.bookId.toString())) continue;
+
+        const book = await Book.findById(item.bookId);
+        if (!book || !book.bookFile) continue; // safety
+
+        booksToAdd.push({
+          bookId: book._id,
+          bookFile: book.bookFile, // ✅ from Book model
+          purchasedAt: new Date(),
+        });
+      }
+
+
+      if (booksToAdd.length > 0) {
+        user.library.push(...booksToAdd);
+        await user.save();
+      }
+    }
 
     res.status(200).json({
       success: true,
@@ -319,29 +305,26 @@ exports.updateOrderStatus = async (req, res) => {
     console.error("Order Status Update Error:", error);
     res.status(500).json({
       success: false,
-      message: "Server error while updating order status",
-      error: error.message,
+      message: "Server error",
     });
   }
 };
 
+
+
 // Update payment status of an order (only for SuperAdmin)
 exports.updatePaymentStatus = async (req, res) => {
   try {
-    const { payment } = req.body; // Get payment status from request body
-    const { id } = req.params;
-    const userRole = req.user.role;
-
-    // Authorization check
-    if (userRole !== "SUPERADMIN") {
+    if (req.user.role !== "SUPERADMIN") {
       return res.status(403).json({
         success: false,
-        message: "Unauthorized: Only Super Admin can update payment status",
+        message: "Only SUPERADMIN can update payment status",
       });
     }
 
-    // Find the order
-    const order = await Order.findById(id);
+    const { payment } = req.body;
+    const order = await Order.findById(req.params.id);
+
     if (!order) {
       return res.status(404).json({
         success: false,
@@ -349,32 +332,26 @@ exports.updatePaymentStatus = async (req, res) => {
       });
     }
 
-    // Validate payment status
-    const validPaymentStatuses = ["PENDING", "PAID"];
-    if (!validPaymentStatuses.includes(payment)) {
+    if (!["PENDING", "PAID"].includes(payment)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid payment status. Allowed values: PENDING, PAID",
+        message: "Invalid payment status",
       });
     }
 
-    // Update payment status
     order.payment = payment;
     await order.save();
 
     res.status(200).json({
       success: true,
-      message: "Payment status updated successfully",
+      message: "Payment status updated",
       order,
     });
   } catch (error) {
-    console.error("Payment Status Update Error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
 
 // Delete order (admin only)
 exports.deleteOrder = async (req, res) => {
