@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useMemo} from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   StyleSheet,
   View,
@@ -9,22 +9,22 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import {theme} from '../../styles/theme';
-import {globalStyles} from '../../styles/globalStyles';
+import { theme } from '../../styles/theme';
+import { globalStyles } from '../../styles/globalStyles';
 import Header from '../../utils/customComponents/customHeader/Header';
-import {useDispatch, useSelector} from 'react-redux';
-import {getUser} from '../../redux/slices/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { getUser } from '../../redux/slices/userSlice';
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import {getAllBooks} from '../../redux/slices/bookSlice';
+import { getAllBooks } from '../../redux/slices/bookSlice';
 import BookCard from '../../utils/customComponents/customCards/bookCard/BookCard';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import Loader from '../../utils/customComponents/customLoader/Loader';
-import {getAllReviews} from '../../redux/slices/reviewSlice';
+import { getAllReviews } from '../../redux/slices/reviewSlice';
 import ReviewCard from '../../utils/customComponents/customReview/Review';
 
-const {width, height} = Dimensions.get('screen');
+const { width, height } = Dimensions.get('screen');
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -37,9 +37,46 @@ const Home = () => {
   const books = useSelector(state => state.book.books);
   const reviews = useSelector(state => state.review.reviews);
 
+  console.log('Books Array length:', books?.length || 0);
+
+  // ──────────────────────────────────────────────
+  //  Robust genre parser (same as in Categories screen)
+  // ──────────────────────────────────────────────
+  const parseGenres = (genreField) => {
+    if (!genreField) return [];
+
+    let raw = genreField;
+
+    // Handle common messed-up formats from backend
+    if (Array.isArray(genreField)) {
+      if (typeof genreField[0] === 'string') {
+        raw = genreField[0];
+      } else if (Array.isArray(genreField[0])) {
+        raw = genreField.flat();
+      }
+    }
+
+    try {
+      let cleaned = typeof raw === 'string' ? raw : JSON.stringify(raw);
+      cleaned = cleaned
+        .replace(/[\[\]\"']/g, '')
+        .replace(/\s*,\s*/g, ',')
+        .replace(/,,/g, ','); // clean double commas
+
+      return cleaned
+        .split(',')
+        .map(g => g.trim())
+        .filter(g => g.length > 0);
+    } catch (e) {
+      console.warn('Failed to parse genre:', genreField, e);
+      return [];
+    }
+  };
+
   const chunkArray = (arr, size) => {
-    return Array.from({length: Math.ceil(arr.length / size)}, (_, index) =>
-      arr.slice(index * size, index * size + size),
+    if (!arr || !Array.isArray(arr)) return [];
+    return Array.from({ length: Math.ceil(arr.length / size) }, (_, index) =>
+      arr.slice(index * size, index * size + size)
     );
   };
 
@@ -56,12 +93,12 @@ const Home = () => {
       dispatch(getAllBooks());
       dispatch(getAllReviews());
     }
-  }, [dispatch, user]);
+  }, [dispatch, user?.id]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1000);
+    }, 1200);
     return () => clearTimeout(timer);
   }, []);
 
@@ -79,89 +116,51 @@ const Home = () => {
       name: review?.user?.userName || userProfile?.userName || 'Anonymous',
       animation: require('../../assets/animations/customer-reviews.json'),
     }));
-  }, [reviews, userProfile]);
+  }, [reviews, userProfile?.userName]);
 
-  // ✅ Get one book per category
-  const getBooksByCategory = () => {
+  // Get one representative book per unique genre
+  const featuredBooksByCategory = useMemo(() => {
     if (!Array.isArray(books) || books.length === 0) return [];
 
     const categoryMap = {};
-    const usedBooks = new Set();
+    const usedBookIds = new Set();
 
     books.forEach(book => {
-      let genres = [];
+      const genres = parseGenres(book.genre);
 
-      if (book.genre) {
-        try {
-          // Try parsing JSON
-          const parsed = JSON.parse(book.genre);
-          if (Array.isArray(parsed)) {
-            parsed.forEach(item => {
-              if (typeof item === 'string') {
-                item.split(',').forEach(g => genres.push(g.trim()));
-              }
-            });
-          }
-        } catch {
-          // Fallback: split by comma if not JSON
-          book.genre.split(',').forEach(g => genres.push(g.trim()));
-        }
-      }
-
-      genres.forEach(g => {
-        if (g && !categoryMap[g] && !usedBooks.has(book._id)) {
-          categoryMap[g] = book;
-          usedBooks.add(book._id);
+      genres.forEach(genre => {
+        if (genre && !categoryMap[genre] && !usedBookIds.has(book._id)) {
+          categoryMap[genre] = book;
+          usedBookIds.add(book._id);
         }
       });
     });
 
-    // Convert map to array
     return Object.entries(categoryMap).map(([category, book]) => ({
       category,
       book,
     }));
-  };
+  }, [books]);
 
-  const handleCategoryPress = genreName => {
-    console.log('🎯 handleCategoryPress called with genreName:', genreName);
-    console.log('📚 Total books available:', books.length);
+  const handleCategoryPress = (genreName) => {
+    if (!genreName) return;
 
-    if (!genreName) {
-      console.warn('⚠️ No genre name provided to handleCategoryPress');
-      return;
-    }
-
-    const genreBooks = books.filter(book => {
-      try {
-        const genres = Array.isArray(book.genre)
-          ? book.genre
-          : JSON.parse(book.genre || '[]');
-
-        console.log(`🔍 Checking book: ${book.title}`);
-        console.log('📂 Parsed genres:', genres);
-
-        return genres.includes(genreName);
-      } catch (err) {
-        console.error('❌ Error parsing genres for book:', book.title, err);
-        return false;
-      }
-    });
-
-    console.log('📊 Books matching genre:', genreBooks.length);
+    const genreBooks = books.filter(book =>
+      parseGenres(book.genre).includes(genreName)
+    );
 
     navigation.navigate('Category_Books', {
-      categoryId: Array.isArray(genreName)
-        ? genreName[0].split(',')[0].trim()
-        : genreName.split(',')[0].trim(),
-      books: chunkArray(genreBooks, 2),
+      categoryName: genreName,
+      categoryId: genreName.toLowerCase().replace(/\s+/g, '-'),
+      books: genreBooks, // flat array
     });
   };
 
   return (
     <LinearGradient
       colors={[theme.colors.primary, theme.colors.secondary]}
-      style={globalStyles.container}>
+      style={globalStyles.container}
+    >
       <View style={styles.headerContainer}>
         <Header
           logo={require('../../assets/splashScreen/splash-logo.png')}
@@ -190,17 +189,15 @@ const Home = () => {
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}>
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* Greeting */}
           <View style={styles.greetingContainer}>
             <View style={styles.greetingLeftContainer}>
               <Text style={styles.greetingTitle}>{greeting}!</Text>
               <Text style={styles.greetingDescription}>
                 Let's get you a book!{' '}
-                <Feather
-                  name={'book'}
-                  size={width * 0.044}
-                  color={theme.colors.white}
-                />
+                <Feather name="book" size={width * 0.044} color={theme.colors.white} />
               </Text>
             </View>
             <View style={styles.greetingRightContainer}>
@@ -208,7 +205,7 @@ const Home = () => {
                 <Image
                   source={
                     userProfile?.profilePicture
-                      ? {uri: userProfile.profilePicture}
+                      ? { uri: userProfile.profilePicture }
                       : require('../../assets/placeholders/default-avatar.png')
                   }
                   style={styles.profileImage}
@@ -217,51 +214,45 @@ const Home = () => {
             </View>
           </View>
 
-          {/* 📚 Books by Category */}
+          {/* Books by Category */}
           <View style={styles.booksSection}>
-            <Text style={styles.sectionTitle}>Books by Category</Text>
-            {chunkArray(getBooksByCategory(), 2).map((row, rowIndex) => (
-              <View
-                key={rowIndex}
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  marginBottom: 20,
-                }}>
-                {row.map(({category, book}) => (
-                  <View key={category} style={{flex: 1, marginHorizontal: 5}}>
-                    <Text
-                      style={{
-                        color: theme.colors.white,
-                        fontSize: 18,
-                        marginBottom: 8,
-                      }}>
-                      {category}
-                    </Text>
-                    <BookCard
-                      title={book.title}
-                      imageUrl={book.bookImage}
-                      onPress={() =>
-                        handleCategoryPress(book.genre?.[0] || book.genre)
-                      }
-                      cardStyle={styles.elevatedCard}
-                      titleStyle={styles.cardTitle}
-                    />
-                  </View>
-                ))}
-              </View>
-            ))}
+            <Text style={styles.sectionTitle}>Explore by Category</Text>
+
+            {featuredBooksByCategory.length === 0 ? (
+              <Text style={styles.noDataText}>No books available yet</Text>
+            ) : (
+              chunkArray(featuredBooksByCategory, 2).map((row, rowIndex) => (
+                <View
+                  key={rowIndex}
+                  style={styles.categoryRow}
+                >
+                  {row.map(({ category, book }) => (
+                    <View key={category} style={styles.categoryItem}>
+                      <Text style={styles.categoryLabel}>{category}</Text>
+                      <BookCard
+                        title={book.title}
+                        imageUrl={book.bookImage}
+                        onPress={() => handleCategoryPress(category)}
+                        cardStyle={styles.elevatedCard}
+                        titleStyle={styles.cardTitle}
+                      />
+                    </View>
+                  ))}
+                </View>
+              ))
+            )}
           </View>
 
-          {/* 💬 Reviews */}
+          {/* Customer Reviews */}
           <View style={styles.reviewSection}>
-            <Text style={styles.reviewTitle}>Customer's Review</Text>
+            <Text style={styles.reviewTitle}>Customer Reviews</Text>
             <Text style={styles.reviewDescription}>
-              We always appreciate feedback from our customers, both excellent
-              and even constructive.
+              We always appreciate feedback from our customers, both excellent and constructive.
             </Text>
-            {formattedReviews.length > 0 && (
+            {formattedReviews.length > 0 ? (
               <ReviewCard reviews={formattedReviews} />
+            ) : (
+              <Text style={styles.noDataText}>No reviews yet</Text>
             )}
           </View>
         </ScrollView>
@@ -273,13 +264,15 @@ const Home = () => {
 export default Home;
 
 const styles = StyleSheet.create({
+  headerContainer: {
+    marginBottom: 8,
+  },
   greetingContainer: {
-    marginTop: height * 0.04,
+    marginTop: height * 0.03,
     paddingHorizontal: width * 0.06,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    gap: theme.gap(2),
   },
   greetingTitle: {
     fontSize: theme.typography.fontSize.lg,
@@ -290,12 +283,14 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.sm,
     fontFamily: theme.typography.fontFamilyMedium,
     color: theme.colors.secondary,
+    marginTop: 4,
   },
   profileImage: {
     width: width * 0.16,
-    height: height * 0.076,
-    resizeMode: 'cover',
-    borderRadius: theme.borderRadius.circle,
+    height: width * 0.16,
+    borderRadius: width * 0.08,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.3)',
   },
   booksSection: {
     marginTop: height * 0.03,
@@ -307,8 +302,23 @@ const styles = StyleSheet.create({
     color: theme.colors.white,
     marginBottom: height * 0.015,
   },
+  categoryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  categoryItem: {
+    flex: 1,
+    marginHorizontal: 6,
+  },
+  categoryLabel: {
+    color: theme.colors.white,
+    fontSize: 17,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
   scrollContent: {
-    paddingBottom: height * 0.1,
+    paddingBottom: height * 0.12,
   },
   loaderContainer: {
     flex: 1,
@@ -318,19 +328,40 @@ const styles = StyleSheet.create({
   reviewSection: {
     marginTop: height * 0.04,
     paddingHorizontal: width * 0.05,
-    marginBottom: height * 0.04,
+    marginBottom: height * 0.06,
   },
   reviewTitle: {
     fontSize: theme.typography.fontSize.xl,
     fontFamily: theme.typography.fontFamilyBold,
     color: theme.colors.white,
-    marginBottom: height * 0.02,
+    marginBottom: height * 0.015,
     textAlign: 'center',
   },
   reviewDescription: {
-    fontSize: width * 0.04,
+    fontSize: width * 0.038,
     fontFamily: theme.typography.fontFamilyRegular,
     color: theme.colors.gray,
     textAlign: 'center',
+    marginBottom: 16,
+  },
+  noDataText: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 16,
+    textAlign: 'center',
+    marginVertical: 30,
+  },
+  elevatedCard: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+  },
+  cardTitle: {
+    color: theme.colors.white,
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

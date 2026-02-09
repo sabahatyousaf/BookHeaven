@@ -9,7 +9,7 @@ import {
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {theme} from '../../styles/theme';
 import Home from '../../screens/dashBoard/Home';
-import Menu from '../../screens/dashBoard/Menu';
+import Categrories from '../../screens/dashBoard/Categories';
 import Cart from '../../screens/cart/cartScreens/Cart';
 import Profile from '../../screens/profile/profileScreens/Profile';
 
@@ -81,7 +81,7 @@ const BottomNavigator = () => {
       />
       <Tab.Screen
         name="Categories"
-        component={Menu}
+        component={Categrories}
         options={{
           tabBarLabel: 'Categories',
           tabBarIcon: ({focused}) => (
